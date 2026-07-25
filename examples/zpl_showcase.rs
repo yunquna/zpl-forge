@@ -17,6 +17,7 @@ use zpl_forge::{FontManager, Resolution, Unit, ZplEngine, ZplForgeBackend};
 /// Static asset imports using `include_str!` macro
 static BITMAP_IMAGE_ZPL: &str = include_str!("assets/bitmap_image.zpl");
 static COLOR_IMAGE_ZPL: &str = include_str!("assets/color_image.zpl");
+static TEST_01_ZPL: &str = include_str!("assets/test_01.zpl");
 
 /// Helper to render a ZPL string with a specified backend and save output.
 fn run_test<B: ZplForgeBackend>(zpl: &str, w: Unit, h: Unit, backend: B, output_name: &str) {
@@ -81,6 +82,20 @@ pub fn render_01_shipping_label() {
         ^XZ
     "#;
 
+    run_test(
+        TEST_01_ZPL,
+        Unit::Inches(4.0),
+        Unit::Inches(6.0),
+        PngBackend::new(),
+        "test_01.png",
+    );
+    run_test(
+        TEST_01_ZPL,
+        Unit::Inches(4.0),
+        Unit::Inches(6.0),
+        PdfNativeBackend::new(),
+        "test_01.pdf",
+    );
     run_test(
         zpl_input,
         Unit::Inches(4.0),
@@ -247,6 +262,20 @@ pub fn render_03_graphics_and_images() {
         Unit::Inches(8.6),
         PdfNativeBackend::new(),
         "showcase_03_graphics.pdf",
+    );
+    run_test(
+        &zpl_input,
+        Unit::Inches(4.5),
+        Unit::Inches(8.6),
+        PngBackend::new(),
+        "test_image_color2.png",
+    );
+    run_test(
+        &zpl_input,
+        Unit::Inches(4.5),
+        Unit::Inches(8.6),
+        PdfNativeBackend::new(),
+        "test_image_color2.pdf",
     );
 }
 

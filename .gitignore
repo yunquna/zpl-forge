@@ -14,3 +14,7 @@ examples/*.pdf
 !examples/reference.png
 !examples/showcase*.png
 !examples/showcase*.pdf
+!examples/test_01.png
+!examples/test_01.pdf
+!examples/test_image_color2.png
+!examples/test_image_color2.pdf
