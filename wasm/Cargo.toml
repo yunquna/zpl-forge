@@ -1,6 +1,6 @@
 [package]
 name = "yqn-zpl-forge-wasm"
-version = "0.3.2-yqn.3"
+version = "0.3.2-yqn.4"
 edition = "2024"
 license = "(MIT OR Apache-2.0) AND BSD-3-Clause"
 repository = "https://github.com/yunquna/zpl-forge"
