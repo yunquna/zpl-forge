@@ -374,14 +374,20 @@ ZPL-Forge imposes reasonable limits to prevent resource exhaustion from malforme
 - **Graphic Field Maximums:** Prevents malicious `^GF` commands from allocating unlimited memory.
 - **Maximum Text Size:** Prevents excessively large font sizes.
 
+## YQN MaxiCode extension
+
+`^BD` modes 2/3/4 are supported in native PDF and PNG; default mode 2 and single-symbol parameters only. PDF emits vector hexagons and rings. Modes 5/6, Structured Append and reverse printing fail explicitly. See [qualification and scope](docs/yqn-maxicode.md).
+
 ## License
 
-Dual-licensed under either:
+Original engine code is dual-licensed under either:
 
 - MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
 
 At your option.
+
+The MaxiCode port additionally includes MIT/BSD-3-Clause source; retain [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) when redistributing source or binaries.
 
 ### Embedded font licenses
 

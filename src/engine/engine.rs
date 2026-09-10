@@ -282,6 +282,7 @@ impl ZplEngine {
                 common::ZplInstruction::Code39 { condition, .. } => condition,
                 common::ZplInstruction::DataMatrix { condition, .. } => condition,
                 common::ZplInstruction::Pdf417 { condition, .. } => condition,
+                common::ZplInstruction::MaxiCode { condition, .. } => condition,
                 common::ZplInstruction::Barcode1D { condition, .. } => condition,
                 common::ZplInstruction::GraphicDiagonal { condition, .. } => condition,
                 common::ZplInstruction::MicroPdf417 { condition, .. } => condition,
@@ -585,6 +586,22 @@ impl ZplEngine {
                         *y,
                         *orientation,
                         *module_size,
+                        &replace_vars(data, variables),
+                        *reverse_print,
+                    )?;
+                }
+                common::ZplInstruction::MaxiCode {
+                    x,
+                    y,
+                    mode,
+                    data,
+                    reverse_print,
+                    ..
+                } => {
+                    backend.draw_maxicode(
+                        *x,
+                        *y,
+                        *mode,
                         &replace_vars(data, variables),
                         *reverse_print,
                     )?;

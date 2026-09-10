@@ -4,6 +4,8 @@
 //! It translates the intermediate representation (`ZplInstruction`) into
 //! specific output formats like images or documents.
 
+#[cfg(any(feature = "png", feature = "pdf"))]
+pub(crate) mod maxicode;
 #[cfg(feature = "pdf")]
 pub mod pdf_native;
 #[cfg(feature = "png")]

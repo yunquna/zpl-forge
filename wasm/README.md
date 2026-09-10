@@ -68,7 +68,7 @@ Errors exported to JS are fixed codes, including `ZPL_INPUT_LIMIT`,
 `ZPL_VARIABLES_LIMIT`, `ZPL_VARIABLES_INVALID`, `ZPL_PAGE_LIMIT`, `ZPL_OUTPUT_LIMIT`.
 No source text, native error details or credentials are exposed.
 
-Engine code: MIT OR Apache-2.0. Bundled fonts retain their upstream license files
+Original engine code: MIT OR Apache-2.0; MaxiCode additionally requires the MIT/BSD-3-Clause notices in THIRD_PARTY_LICENSES.md. Bundled fonts retain their upstream license files
 in `licenses/`; caller-supplied fonts require their own distribution rights.
 Independent CLI, HTTP service, container and production routing are deferred.
 
@@ -81,3 +81,7 @@ unsupported scripts, variation sequences, missing glyphs and fields above 4096
 Unicode scalars. Other font identifiers retain their existing behavior.
 `renderPdf`, `renderPdfPages` and `renderPng` retain the legacy layout.
 Automatic font fallback, bidirectional text and shaped native PNG are deferred.
+
+## MaxiCode (unreleased)
+
+`^BD` modes 2/3/4 now render in PDF/PNG, with fixed physical size independent of `^BY`. Single symbol only; modes 5/6, Structured Append and reverse printing are rejected. Qualification and reproduction: `../docs/yqn-maxicode.md`. This does not imply Components or Dev deployment.

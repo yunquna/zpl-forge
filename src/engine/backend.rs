@@ -7,6 +7,20 @@ use crate::{FontManager, ZplResult};
 /// different targets such as images (PNG, JPG), PDF documents, or raw byte streams.
 #[allow(clippy::too_many_arguments)]
 pub trait ZplForgeBackend {
+    /// Fixed physical-size MaxiCode. Backends must opt in explicitly.
+    fn draw_maxicode(
+        &mut self,
+        _x: u32,
+        _y: u32,
+        _mode: u32,
+        _data: &str,
+        _reverse_print: bool,
+    ) -> ZplResult<()> {
+        Err(crate::ZplError::BackendError(
+            "MAXICODE_BACKEND_UNSUPPORTED".into(),
+        ))
+    }
+
     /// Initializes the rendering surface with the specified dimensions.
     fn setup_page(&mut self, width: f64, height: f64, resolution: f32);
 

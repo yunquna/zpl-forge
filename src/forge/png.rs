@@ -35,6 +35,7 @@ const PDF417_TEXT_COMPACTION: u32 = 1;
 /// This backend uses the `image` and `imageproc` crates to draw ZPL instructions
 /// onto an RGB canvas.
 pub struct PngBackend {
+    resolution: f32,
     canvas: RgbImage,
     font_manager: Option<Arc<FontManager>>,
 }
@@ -49,6 +50,7 @@ impl PngBackend {
     /// Creates a new `PngBackend` instance with an empty canvas.
     pub fn new() -> Self {
         Self {
+            resolution: 203.2,
             canvas: ImageBuffer::new(0, 0),
             font_manager: None,
         }
@@ -162,7 +164,8 @@ impl PngBackend {
 }
 
 impl ZplForgeBackend for PngBackend {
-    fn setup_page(&mut self, width: f64, height: f64, _resolution: f32) {
+    fn setup_page(&mut self, width: f64, height: f64, resolution: f32) {
+        self.resolution = if resolution > 0.0 { resolution } else { 203.2 };
         // Safety limit to avoid OOM: 8192x8192 is enough for most labels
         const MAX_DIM: u32 = 8192;
         let w = (width as u32).min(MAX_DIM);
@@ -601,6 +604,62 @@ impl ZplForgeBackend for PngBackend {
 
         let m = max(module_size, 1);
         self.fill_matrix_cells(x, y, orientation, m, m, &bit_matrix, reverse_print);
+        Ok(())
+    }
+
+    fn draw_maxicode(
+        &mut self,
+        x: u32,
+        y: u32,
+        mode: u32,
+        data: &str,
+        reverse_print: bool,
+    ) -> ZplResult<()> {
+        if reverse_print {
+            return Err(ZplError::BackendError(
+                "MAXICODE_REVERSE_UNSUPPORTED".into(),
+            ));
+        }
+        let words =
+            super::maxicode::encode_codewords(data, mode as i32).map_err(ZplError::BackendError)?;
+        let unit = self.resolution as f64 / 200.0;
+        let size = self.resolution.ceil() as u32 + 2;
+        let mut symbol = ImageBuffer::from_pixel(size, size, Rgb([255u8, 255, 255]));
+        for (cx, cy) in super::maxicode::modules(&words) {
+            let points: Vec<_> = super::maxicode::hexagon(cx, cy)
+                .into_iter()
+                .map(|(px, py)| {
+                    imageproc::point::Point::new(
+                        (px * unit).round() as i32,
+                        (py * unit).round() as i32,
+                    )
+                })
+                .collect();
+            imageproc::drawing::draw_polygon_mut(&mut symbol, &points, Rgb([0, 0, 0]));
+        }
+        for (inner, outer) in [(4.0, 9.0), (14.0, 19.0), (24.0, 29.0)] {
+            for sy in 0..size {
+                for sx in 0..size {
+                    let dx = (sx as f64 + 0.5) / unit - 100.0;
+                    let dy = (sy as f64 + 0.5) / unit - 96.5;
+                    let d = dx * dx + dy * dy;
+                    if d >= inner * inner && d <= outer * outer {
+                        symbol.put_pixel(sx, sy, Rgb([0, 0, 0]));
+                    }
+                }
+            }
+        }
+        for sy in 0..size {
+            for sx in 0..size {
+                if symbol[(sx, sy)].0 == [0, 0, 0] {
+                    let dx = u64::from(x) + u64::from(sx);
+                    let dy = u64::from(y) + u64::from(sy);
+                    if dx < u64::from(self.canvas.width()) && dy < u64::from(self.canvas.height()) {
+                        self.canvas.put_pixel(dx as u32, dy as u32, Rgb([0, 0, 0]));
+                    }
+                }
+            }
+        }
         Ok(())
     }
 

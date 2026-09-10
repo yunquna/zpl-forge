@@ -1,12 +1,23 @@
 {
   "name": "@yunquna/zpl-forge-wasm",
-  "version": "0.3.2-yqn.2",
+  "version": "0.3.2-yqn.3",
   "private": true,
   "type": "module",
   "main": "zpl_forge.js",
   "types": "zpl_forge.d.ts",
-  "sideEffects": ["./zpl_forge.js"],
-  "license": "MIT OR Apache-2.0",
+  "sideEffects": [
+    "./zpl_forge.js"
+  ],
+  "license": "(MIT OR Apache-2.0) AND BSD-3-Clause",
   "repository": "https://github.com/yunquna/zpl-forge",
-  "files": ["*.js", "*.wasm", "*.d.ts", "LICENSE-*", "licenses", "README.md", "provenance.txt"]
+  "files": [
+    "*.js",
+    "*.wasm",
+    "*.d.ts",
+    "LICENSE-*",
+    "THIRD_PARTY_LICENSES.md",
+    "licenses",
+    "README.md",
+    "provenance.txt"
+  ]
 }

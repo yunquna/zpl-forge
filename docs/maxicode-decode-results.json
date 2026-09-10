@@ -1,0 +1,128 @@
+[
+  {
+    "file": "mode2-203.png",
+    "mode": 2,
+    "dpi": 203,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode2-203.preview.png",
+    "mode": 2,
+    "dpi": 203,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode2-300.png",
+    "mode": 2,
+    "dpi": 300,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode2-300.preview.png",
+    "mode": 2,
+    "dpi": 300,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode2-600.png",
+    "mode": 2,
+    "dpi": 600,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode2-600.preview.png",
+    "mode": 2,
+    "dpi": 600,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode3-203.png",
+    "mode": 3,
+    "dpi": 203,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode3-203.preview.png",
+    "mode": 3,
+    "dpi": 203,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode3-300.png",
+    "mode": 3,
+    "dpi": 300,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode3-300.preview.png",
+    "mode": 3,
+    "dpi": 300,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode3-600.png",
+    "mode": 3,
+    "dpi": 600,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode3-600.preview.png",
+    "mode": 3,
+    "dpi": 600,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode4-203.png",
+    "mode": 4,
+    "dpi": 203,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode4-203.preview.png",
+    "mode": 4,
+    "dpi": 203,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode4-300.png",
+    "mode": 4,
+    "dpi": 300,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode4-300.preview.png",
+    "mode": 4,
+    "dpi": 300,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode4-600.png",
+    "mode": 4,
+    "dpi": 600,
+    "decoded": true,
+    "isolatedSymbol": true
+  },
+  {
+    "file": "mode4-600.preview.png",
+    "mode": 4,
+    "dpi": 600,
+    "decoded": true,
+    "isolatedSymbol": true
+  }
+]

@@ -5,7 +5,8 @@
 .claude
 .parity/
 output_comparisons/
-tests
+/tests/*
+!/tests/maxicode.rs
 tools
 
 # Generated example outputs
