@@ -131,7 +131,7 @@ pub struct PdfNativeBackend {
     /// Tracks which font identifiers (e.g. 'A', 'B', '0') have been used during rendering.
     used_fonts: HashSet<char>,
     #[cfg(feature = "unicode-pdf")]
-    unicode_fonts: Option<BTreeMap<char, BTreeMap<char, u16>>>,
+    unicode_fonts: Option<BTreeMap<char, BTreeMap<(u16, String), u16>>>,
     compression: Compression,
     /// Optional document title for the PDF Info dictionary.
     title: Option<String>,
@@ -363,7 +363,9 @@ impl PdfNativeBackend {
                     }
                     let next = u16::try_from(chars.len() + 1)
                         .map_err(|_| ZplError::FontError("Font character limit".into()))?;
-                    let cid = *chars.entry(ch).or_insert(next);
+                    let cid = *chars
+                        .entry((font.glyph_id(ch).0, ch.to_string()))
+                        .or_insert(next);
                     self.content
                         .extend_from_slice(format!("{cid:04X}").as_bytes());
                 }
@@ -383,6 +385,36 @@ impl PdfNativeBackend {
             }
         }
         self.content.extend_from_slice(b") Tj\n");
+        Ok(())
+    }
+
+    #[cfg(feature = "shaped-pdf")]
+    fn emit_shaped(&mut self, text: &str, font: char, tm: [f64; 6]) -> ZplResult<()> {
+        let run = self.font_manager.as_ref().unwrap().shape(text)?;
+        let original = std::iter::once(0xFEFFu16)
+            .chain(text.encode_utf16())
+            .map(|u| format!("{u:04X}"))
+            .collect::<String>();
+        self.emit_op(&format!("/Span << /ActualText <{original}> >> BDC"));
+        for glyph in run.glyphs {
+            let chars = self
+                .unicode_fonts
+                .as_mut()
+                .ok_or_else(|| ZplError::FontError("Shaping requires Unicode PDF".into()))?
+                .entry(font)
+                .or_default();
+            let next = u16::try_from(chars.len() + 1)
+                .map_err(|_| ZplError::FontError("Font character limit".into()))?;
+            // Continuation glyphs have no standalone Unicode mapping; ActualText owns the cluster.
+            let source = glyph.source;
+            let cid = *chars.entry((glyph.id, source)).or_insert(next);
+            let mut positioned = tm;
+            positioned[4] += (tm[0] * glyph.x + tm[2] * glyph.y) / run.units;
+            positioned[5] += (tm[1] * glyph.x + tm[3] * glyph.y) / run.units;
+            self.emit_nums(&positioned, "Tm");
+            self.emit_op(&format!("<{cid:04X}> Tj"));
+        }
+        self.emit_op("EMC");
         Ok(())
     }
 
@@ -1130,6 +1162,13 @@ impl ZplForgeBackend for PdfNativeBackend {
         self.emit_nums(&tm, "Tm");
         let font_resource_name = format!("F_{}", font);
         self.emit_name_op(&format!("{} 1", font_resource_name), "Tf");
+        #[cfg(feature = "shaped-pdf")]
+        if self.font_manager.as_ref().is_some_and(|fm| fm.shapes(font)) {
+            self.emit_shaped(text, font, tm)?;
+        } else {
+            self.emit_tj(text, font)?;
+        }
+        #[cfg(not(feature = "shaped-pdf"))]
         self.emit_tj(text, font)?;
         self.emit_op("ET");
 

@@ -165,12 +165,14 @@ const INTERPRETATION_GAP: u32 = 6;
 /// identifiers used in ZPL commands (e.g., '^A0', '^AA').
 #[derive(Debug, Clone)]
 pub struct FontManager {
+    #[cfg(feature = "shaped-pdf")]
+    shaped_pdf: bool,
     /// Maps ZPL font identifiers (as Strings) to internal font names.
     font_map: HashMap<String, String>,
     /// Stores the actual font data indexed by internal font names.
     font_index: HashMap<String, FontArc>,
     /// Stores the raw TTF/OTF bytes indexed by internal font names.
-    font_bytes: HashMap<String, Vec<u8>>,
+    font_bytes: HashMap<String, std::sync::Arc<[u8]>>,
     /// Normalization metrics per internal font name, computed at registration.
     font_metrics: HashMap<String, FontMetrics>,
 }
@@ -185,6 +187,8 @@ impl Default for FontManager {
     /// - OCR-B is registered for OCR-B identifier ('E').
     fn default() -> Self {
         let mut current = Self {
+            #[cfg(feature = "shaped-pdf")]
+            shaped_pdf: false,
             font_map: HashMap::new(),
             font_index: HashMap::new(),
             font_bytes: HashMap::new(),
@@ -202,12 +206,33 @@ impl Default for FontManager {
 }
 
 impl FontManager {
+    /// Opt-in PDF font-0 layout; do not pass this manager to legacy raster backends.
+    #[cfg(feature = "shaped-pdf")]
+    pub fn with_pdf_shaping(mut self) -> Self {
+        self.shaped_pdf = true;
+        self
+    }
+
+    #[cfg(feature = "shaped-pdf")]
+    pub(crate) fn shapes(&self, font: char) -> bool {
+        self.shaped_pdf && font == '0'
+    }
+
+    #[cfg(feature = "shaped-pdf")]
+    pub(crate) fn shape(&self, text: &str) -> crate::ZplResult<super::shaping::Run> {
+        super::shaping::shape(
+            self.get_font_bytes("0")
+                .ok_or_else(|| crate::ZplError::FontError("Font 0 missing".into()))?,
+            text,
+        )
+    }
+
     /// Retrieves the raw TTF/OTF bytes for a font by its ZPL identifier.
     ///
     /// This is used by backends that need the raw font data (e.g., PDF embedding).
     pub fn get_font_bytes(&self, name: &str) -> Option<&[u8]> {
         let font_name = self.font_map.get(name)?;
-        self.font_bytes.get(font_name).map(|v| v.as_slice())
+        self.font_bytes.get(font_name).map(|v| v.as_ref())
     }
 
     /// Returns the internal font name mapped to a ZPL identifier.
@@ -312,6 +337,12 @@ impl FontManager {
         let Some((font, layout)) = self.text_layout(font_char, height, width) else {
             return 0;
         };
+        #[cfg(feature = "shaped-pdf")]
+        if self.shapes(font_char) {
+            if let Ok(run) = self.shape(text) {
+                return (run.advance / run.units * f64::from(layout.em_x)).ceil() as u32;
+            }
+        }
         let scaled = font.as_scaled(layout.px);
         let mut w = 0.0_f32;
         let mut last = None;
@@ -369,7 +400,8 @@ impl FontManager {
         self.font_metrics
             .insert(name.to_string(), FontMetrics::from_font(&font));
         self.font_index.insert(name.to_string(), font);
-        self.font_bytes.insert(name.to_string(), bytes.to_vec());
+        self.font_bytes
+            .insert(name.to_string(), std::sync::Arc::from(bytes));
         self.assign_font(name, from, to);
         Ok(())
     }

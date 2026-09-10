@@ -23,3 +23,6 @@ pub use backend::ZplForgeBackend;
 pub use common::{Barcode1DKind, Resolution, TextBlock, Unit, ZplInstruction};
 pub use engine::ZplEngine;
 pub use font::FontManager;
+
+#[cfg(feature = "shaped-pdf")]
+pub(crate) mod shaping;

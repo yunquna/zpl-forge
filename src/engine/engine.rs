@@ -310,6 +310,12 @@ impl ZplEngine {
                     block,
                 } => {
                     let resolved = replace_vars(text, variables);
+                    #[cfg(feature = "shaped-pdf")]
+                    if font_manager.shapes(*font) {
+                        for segment in resolved.split("\\&") {
+                            font_manager.shape(segment)?;
+                        }
+                    }
 
                     let Some(b) = block else {
                         backend.draw_text(
@@ -330,6 +336,13 @@ impl ZplEngine {
                     // according to the field orientation.
                     let measure =
                         |s: &str| measure_text_dots(font_manager, *font, *height, *width, s);
+                    #[cfg(feature = "shaped-pdf")]
+                    let lines = if font_manager.shapes(*font) {
+                        super::shaping::wrap(&resolved, b.width, measure)
+                    } else {
+                        wrap_text_block(&resolved, b.width, measure)
+                    };
+                    #[cfg(not(feature = "shaped-pdf"))]
                     let lines = wrap_text_block(&resolved, b.width, measure);
                     let n_lines = lines.len().min(b.max_lines.max(1) as usize);
 
