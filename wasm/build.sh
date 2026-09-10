@@ -18,7 +18,7 @@ cargo build --manifest-path wasm/Cargo.toml --locked --release \
   --target wasm32-unknown-unknown --target-dir "$wasm_target_dir" -j 2 "$@"
 "$wasm_bindgen_bin" --target bundler --out-name zpl_forge --out-dir wasm/pkg \
   "$wasm_target_dir/wasm32-unknown-unknown/release/yqn_zpl_forge_wasm.wasm"
-cp wasm/package.json wasm/README.md LICENSE-MIT LICENSE-APACHE wasm/pkg/
+cp wasm/package.json wasm/README.md LICENSE-MIT LICENSE-APACHE THIRD_PARTY_LICENSES.md wasm/pkg/
 mkdir -p wasm/pkg/licenses
 cp src/assets/*LICENSE.txt src/assets/OFL.txt wasm/pkg/licenses/
 {

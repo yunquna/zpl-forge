@@ -375,6 +375,23 @@ impl ZplInstructionBuilder {
                     self.state.instruction_type = Some(state::ZplInstructionType::DataMatrix);
                 }
 
+                cmd::Command::MaxiCode {
+                    mode,
+                    symbol,
+                    total,
+                } => {
+                    let mode = mode.unwrap_or(2);
+                    if !(2..=4).contains(&mode)
+                        || symbol.unwrap_or(1) != 1
+                        || total.unwrap_or(1) != 1
+                    {
+                        return Err(crate::ZplError::InstructionError(
+                            "MAXICODE_UNSUPPORTED: modes 2/3/4, single symbol only".into(),
+                        ));
+                    }
+                    self.state.params.model = mode;
+                    self.state.instruction_type = Some(state::ZplInstructionType::MaxiCode);
+                }
                 cmd::Command::Pdf417 {
                     orientation,
                     height,
@@ -660,6 +677,16 @@ impl ZplInstructionBuilder {
                                     y,
                                     orientation: self.state.attributes.orientation.unwrap_or('N'),
                                     module_size: self.state.metrics.thickness,
+                                    data,
+                                    reverse_print,
+                                    condition,
+                                });
+                            }
+                            state::ZplInstructionType::MaxiCode => {
+                                instructions.push(common::ZplInstruction::MaxiCode {
+                                    x,
+                                    y,
+                                    mode: self.state.params.model,
                                     data,
                                     reverse_print,
                                     condition,

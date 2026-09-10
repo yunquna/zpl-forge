@@ -140,6 +140,7 @@ pub enum ZplInstructionType {
     /// Data Matrix barcode.
     DataMatrix,
     /// PDF417 barcode.
+    MaxiCode,
     Pdf417,
     /// Generic 1-D barcode (EAN-13, UPC-A, ITF, Code 93, EAN-8, UPC-E, Codabar, MSI, Postnet, GS1 DataBar).
     Barcode1D(crate::engine::common::Barcode1DKind),

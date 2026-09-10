@@ -788,3 +788,29 @@ pub fn cmd_ci(input: Span) -> Res<cmd::Command> {
     let (input, charset) = cut(opt_param(parse_u32)).parse(input)?;
     Ok((input, cmd::Command::ChangeIntFont { charset }))
 }
+
+/// Zebra ^BDm,n,t. ^BY does not affect the fixed-size MaxiCode symbol.
+pub fn cmd_bd(input: Span) -> Res<cmd::Command> {
+    let (input, _) = tag("^BD").parse(input)?;
+    let (rest, args) = cut(take_till(|c| c == '^')).parse(input)?;
+    let failure = || nom::Err::Failure(nom::error::Error::new(args, nom::error::ErrorKind::Digit));
+    let parts: Vec<_> = args.split(',').collect();
+    if parts.len() > 3 {
+        return Err(failure());
+    }
+    let mut values = [None; 3];
+    for (index, value) in parts.iter().enumerate() {
+        let value = value.trim();
+        if !value.is_empty() {
+            values[index] = Some(value.parse::<u32>().map_err(|_| failure())?);
+        }
+    }
+    Ok((
+        rest,
+        cmd::Command::MaxiCode {
+            mode: values[0],
+            symbol: values[1],
+            total: values[2],
+        },
+    ))
+}

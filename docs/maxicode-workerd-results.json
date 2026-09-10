@@ -1,0 +1,128 @@
+[
+  {
+    "mode": 2,
+    "dpi": 203,
+    "format": "pdf",
+    "bytes": 14905,
+    "returnedLinearMemory": 45744128
+  },
+  {
+    "mode": 2,
+    "dpi": 203,
+    "format": "png",
+    "bytes": 33721,
+    "returnedLinearMemory": 45744128
+  },
+  {
+    "mode": 2,
+    "dpi": 300,
+    "format": "pdf",
+    "bytes": 14698,
+    "returnedLinearMemory": 45744128
+  },
+  {
+    "mode": 2,
+    "dpi": 300,
+    "format": "png",
+    "bytes": 52367,
+    "returnedLinearMemory": 45744128
+  },
+  {
+    "mode": 2,
+    "dpi": 600,
+    "format": "pdf",
+    "bytes": 14685,
+    "returnedLinearMemory": 45744128
+  },
+  {
+    "mode": 2,
+    "dpi": 600,
+    "format": "png",
+    "bytes": 99035,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 3,
+    "dpi": 203,
+    "format": "pdf",
+    "bytes": 14822,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 3,
+    "dpi": 203,
+    "format": "png",
+    "bytes": 33668,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 3,
+    "dpi": 300,
+    "format": "pdf",
+    "bytes": 14614,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 3,
+    "dpi": 300,
+    "format": "png",
+    "bytes": 52262,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 3,
+    "dpi": 600,
+    "format": "pdf",
+    "bytes": 14600,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 3,
+    "dpi": 600,
+    "format": "png",
+    "bytes": 98771,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 4,
+    "dpi": 203,
+    "format": "pdf",
+    "bytes": 14260,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 4,
+    "dpi": 203,
+    "format": "png",
+    "bytes": 33257,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 4,
+    "dpi": 300,
+    "format": "pdf",
+    "bytes": 14055,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 4,
+    "dpi": 300,
+    "format": "png",
+    "bytes": 51463,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 4,
+    "dpi": 600,
+    "format": "pdf",
+    "bytes": 14031,
+    "returnedLinearMemory": 57802752
+  },
+  {
+    "mode": 4,
+    "dpi": 600,
+    "format": "png",
+    "bytes": 96987,
+    "returnedLinearMemory": 57802752
+  }
+]

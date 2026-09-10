@@ -1569,6 +1569,54 @@ impl ZplForgeBackend for PdfNativeBackend {
 
     // ── PDF417 barcode ─────────────────────────────────────────────
 
+    fn draw_maxicode(
+        &mut self,
+        x: u32,
+        y: u32,
+        mode: u32,
+        data: &str,
+        reverse_print: bool,
+    ) -> ZplResult<()> {
+        if reverse_print {
+            return Err(ZplError::BackendError(
+                "MAXICODE_REVERSE_UNSUPPORTED".into(),
+            ));
+        }
+        let words =
+            super::maxicode::encode_codewords(data, mode as i32).map_err(ZplError::BackendError)?;
+        let unit = 72.0 / 200.0;
+        let ox = self.d2pt(x as f64);
+        let oy = self.height_pt - self.d2pt(y as f64);
+        self.save_state();
+        self.set_fill_color(0.0, 0.0, 0.0);
+        for (cx, cy) in super::maxicode::modules(&words) {
+            for (i, (px, py)) in super::maxicode::hexagon(cx, cy).into_iter().enumerate() {
+                self.emit_nums(
+                    &[ox + px * unit, oy - py * unit],
+                    if i == 0 { "m" } else { "l" },
+                );
+            }
+            self.emit_op("h f");
+        }
+        for (inner, outer) in [(4.0, 9.0), (14.0, 19.0), (24.0, 29.0)] {
+            self.push_ellipse_path(
+                ox + 100.0 * unit,
+                oy - 96.5 * unit,
+                outer * unit,
+                outer * unit,
+            );
+            self.push_ellipse_path(
+                ox + 100.0 * unit,
+                oy - 96.5 * unit,
+                inner * unit,
+                inner * unit,
+            );
+            self.emit_op("f*");
+        }
+        self.restore_state();
+        Ok(())
+    }
+
     fn draw_pdf417(
         &mut self,
         x: u32,

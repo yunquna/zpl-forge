@@ -316,6 +316,11 @@ pub enum Command {
 
     /// ^B7 - PDF417 Barcode
     /// Multi-dimensional PDF417 Barcode.
+    MaxiCode {
+        mode: Option<u32>,
+        symbol: Option<u32>,
+        total: Option<u32>,
+    },
     Pdf417 {
         /// Orientation
         orientation: Option<char>,

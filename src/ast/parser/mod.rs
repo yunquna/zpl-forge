@@ -71,6 +71,7 @@ pub fn parse_zpl(input: &str) -> ZplResult<Vec<cmd::Command>> {
                 custom::cmd_ifc,
             )),
             alt((
+                standard::cmd_bd,
                 standard::cmd_b8,
                 standard::cmd_b9,
                 standard::cmd_bb,

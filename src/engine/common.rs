@@ -189,6 +189,14 @@ pub enum ZplInstruction {
         condition: Option<(String, String)>,
     },
     /// Draws a PDF417 barcode.
+    MaxiCode {
+        x: u32,
+        y: u32,
+        mode: u32,
+        data: String,
+        reverse_print: bool,
+        condition: Option<(String, String)>,
+    },
     Pdf417 {
         x: u32,
         y: u32,
