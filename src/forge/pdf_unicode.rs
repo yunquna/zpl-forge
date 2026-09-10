@@ -10,7 +10,7 @@ use crate::{ZplError, ZplResult};
 pub(super) fn embed(
     doc: &mut Document,
     raw: &[u8],
-    chars: &BTreeMap<char, u16>,
+    chars: &BTreeMap<(u16, String), u16>,
 ) -> ZplResult<ObjectId> {
     // CIDFontType2/FontFile2 requires TrueType outlines. Do not mislabel CFF/OTC.
     if !raw.starts_with(&[0, 1, 0, 0]) && !raw.starts_with(b"true") {
@@ -33,23 +33,28 @@ pub(super) fn embed(
     );
     let entries: Vec<_> = chars.iter().collect();
     for chunk in entries.chunks(100) {
-        cmap.push_str(&format!("{} beginbfchar\n", chunk.len()));
+        let mapped_count = chunk.iter().filter(|(ch, _)| !ch.1.is_empty()).count();
+        if mapped_count > 0 {
+            cmap.push_str(&format!("{mapped_count} beginbfchar\n"));
+        }
         for &(ch, cid) in chunk {
-            let gid = face.glyph_id(*ch).0;
+            let gid = ch.0;
             let mapped = remapper.remap(gid);
             let offset = usize::from(*cid) * 2;
             cid_to_gid[offset..offset + 2].copy_from_slice(&mapped.to_be_bytes());
             widths[usize::from(*cid) - 1] =
-                scale(face.h_advance_unscaled(face.glyph_id(*ch)) as f64).into();
-            let mut buffer = [0u16; 2];
-            let unicode = ch
-                .encode_utf16(&mut buffer)
-                .iter()
-                .map(|unit| format!("{unit:04X}"))
-                .collect::<String>();
-            cmap.push_str(&format!("<{cid:04X}> <{unicode}>\n"));
+                scale(face.h_advance_unscaled(ab_glyph::GlyphId(gid)) as f64).into();
+            let unicode =
+                ch.1.encode_utf16()
+                    .map(|unit| format!("{unit:04X}"))
+                    .collect::<String>();
+            if !unicode.is_empty() {
+                cmap.push_str(&format!("<{cid:04X}> <{unicode}>\n"));
+            }
         }
-        cmap.push_str("endbfchar\n");
+        if mapped_count > 0 {
+            cmap.push_str("endbfchar\n");
+        }
     }
     cmap.push_str("endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend\n");
     let subset = subsetter::subset(raw, 0, &remapper)

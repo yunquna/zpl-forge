@@ -71,3 +71,13 @@ No source text, native error details or credentials are exposed.
 Engine code: MIT OR Apache-2.0. Bundled fonts retain their upstream license files
 in `licenses/`; caller-supplied fonts require their own distribution rights.
 Independent CLI, HTTP service, container and production routing are deferred.
+
+## Opt-in shaped PDF (YQN.2)
+
+`renderShapedPdf(zpl, widthDots, heightDots, dpi)` uses the registered static
+TrueType font 0 with CJK/Latin left-to-right shaping, grapheme-safe wrapping,
+and searchable PDF glyph clusters. Call `setDefaultFont` first. It rejects
+unsupported scripts, variation sequences, missing glyphs and fields above 4096
+Unicode scalars. Other font identifiers retain their existing behavior.
+`renderPdf`, `renderPdfPages` and `renderPng` retain the legacy layout.
+Automatic font fallback, bidirectional text and shaped native PNG are deferred.
