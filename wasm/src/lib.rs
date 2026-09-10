@@ -56,10 +56,23 @@ impl ZplRenderer {
 
     /// Opt-in CJK/Latin shaped PDF. The existing renderPdf and renderPng remain unchanged.
     #[wasm_bindgen(js_name = renderShapedPdf)]
-    pub fn render_shaped_pdf(&self, zpl: &str, width: u32, height: u32, dpi: u32) -> Result<Vec<u8>, JsError> {
+    pub fn render_shaped_pdf(
+        &self,
+        zpl: &str,
+        width: u32,
+        height: u32,
+        dpi: u32,
+    ) -> Result<Vec<u8>, JsError> {
         let mut engine = self.engine(zpl, width, height, dpi)?;
         engine.set_fonts(Arc::new((*self.fonts).clone().with_pdf_shaping()));
-        check_output(engine.render(zpl_forge::forge::pdf_native::PdfNativeBackend::new().with_unicode_fonts(), &std::collections::HashMap::new()).map_err(map_render_error)?)
+        check_output(
+            engine
+                .render(
+                    zpl_forge::forge::pdf_native::PdfNativeBackend::new().with_unicode_fonts(),
+                    &std::collections::HashMap::new(),
+                )
+                .map_err(map_render_error)?,
+        )
     }
 
     /// Render one template with a JSON array of string-variable maps, one map per page.
