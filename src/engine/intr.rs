@@ -13,6 +13,7 @@ const DEFAULT_BAR_RATIO: f64 = 3.0;
 /// Decodes hexadecimal escape sequences (e.g. `_XX`) inside `FieldData` strings when `^FH` is active.
 fn unescape_hex(data: &str, indicator: char) -> String {
     let mut result = String::with_capacity(data.len());
+    let mut bytes = Vec::with_capacity(data.len());
     let mut chars = data.chars().peekable();
 
     while let Some(ch) = chars.next() {
@@ -31,16 +32,22 @@ fn unescape_hex(data: &str, indicator: char) -> String {
             if hex_str.len() == 2
                 && let Ok(byte) = u8::from_str_radix(&hex_str, 16)
             {
+                bytes.push(byte);
                 result.push(byte as char);
                 continue;
             }
+            bytes.extend_from_slice(indicator.encode_utf8(&mut [0; 4]).as_bytes());
+            bytes.extend_from_slice(hex_str.as_bytes());
             result.push(indicator);
             result.push_str(&hex_str);
         } else {
+            bytes.extend_from_slice(ch.encode_utf8(&mut [0; 4]).as_bytes());
             result.push(ch);
         }
     }
-    result
+    // Decode complete UTF-8 byte sequences only after parsing the field.
+    // Keep the historical single-byte interpretation for non-UTF-8 input.
+    String::from_utf8(bytes).unwrap_or(result)
 }
 
 /// A builder that converts a sequence of AST commands into renderable instructions.
@@ -792,5 +799,17 @@ impl ZplInstructionBuilder {
         }
 
         Ok(instructions)
+    }
+}
+
+#[cfg(test)]
+mod hex_tests {
+    use super::unescape_hex;
+    #[test]
+    fn utf8_fields_preserve_text_and_do_not_reparse_commands() {
+        assert_eq!(unescape_hex(r"\E4\B8\AD\E6\96\87箱标", '\\'), "中文箱标");
+        assert_eq!(unescape_hex("_5EXZ_1D_1E_04", '_'), "^XZ\u{1d}\u{1e}\u{4}");
+        assert_eq!(unescape_hex("caf_E9", '_'), "café");
+        assert_eq!(unescape_hex("_E4_B8_AD__1G_", '_'), "中__1G_");
     }
 }
