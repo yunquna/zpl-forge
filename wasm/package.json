@@ -1,6 +1,6 @@
 {
   "name": "@yunquna/zpl-forge-wasm",
-  "version": "0.3.2-yqn.3",
+  "version": "0.3.2-yqn.4",
   "private": true,
   "type": "module",
   "main": "zpl_forge.js",

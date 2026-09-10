@@ -85,3 +85,5 @@ Automatic font fallback, bidirectional text and shaped native PNG are deferred.
 ## MaxiCode (unreleased)
 
 `^BD` modes 2/3/4 now render in PDF/PNG, with fixed physical size independent of `^BY`. Single symbol only; modes 5/6, Structured Append and reverse printing are rejected. Qualification and reproduction: `../docs/yqn-maxicode.md`. This does not imply Components or Dev deployment.
+
+YQN .4 fixes UTF-8 byte sequences in parsed `^FH` fields (including Chinese Handlebars variables), retaining legacy single-byte fallback. Escapes are decoded after command parsing, so escaped command prefixes remain field data.
