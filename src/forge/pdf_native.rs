@@ -4,7 +4,12 @@
 //! vector operations for maximum quality and minimal file size.
 
 use std::cmp::max;
+#[cfg(feature = "unicode-pdf")]
+use std::collections::BTreeMap;
 use std::collections::{HashMap, HashSet};
+#[cfg(feature = "unicode-pdf")]
+#[path = "pdf_unicode.rs"]
+mod unicode;
 use std::io::Write;
 use std::sync::Arc;
 
@@ -125,6 +130,8 @@ pub struct PdfNativeBackend {
     image_counter: usize,
     /// Tracks which font identifiers (e.g. 'A', 'B', '0') have been used during rendering.
     used_fonts: HashSet<char>,
+    #[cfg(feature = "unicode-pdf")]
+    unicode_fonts: Option<BTreeMap<char, BTreeMap<char, u16>>>,
     compression: Compression,
     /// Optional document title for the PDF Info dictionary.
     title: Option<String>,
@@ -159,10 +166,19 @@ impl PdfNativeBackend {
             images: Vec::new(),
             image_counter: 0,
             used_fonts: HashSet::new(),
+            #[cfg(feature = "unicode-pdf")]
+            unicode_fonts: None,
             compression: Compression::default(),
             title: None,
             backdrop_rects: Vec::new(),
         }
+    }
+
+    /// Use subsetted TrueType CID fonts with Unicode extraction. Missing glyphs fail.
+    #[cfg(feature = "unicode-pdf")]
+    pub fn with_unicode_fonts(mut self) -> Self {
+        self.unicode_fonts = Some(BTreeMap::new());
+        self
     }
 
     /// Sets the zlib compression level for the PDF output (builder pattern).
@@ -318,7 +334,43 @@ impl PdfNativeBackend {
 
     /// Emit `(escaped) Tj\n`, encoding the text as WinAnsi (CP1252) to match
     /// the embedded fonts' /Encoding. Unmappable characters become '?'.
-    fn emit_tj(&mut self, text: &str) {
+    fn emit_tj(&mut self, text: &str, _font: char) -> ZplResult<()> {
+        #[cfg(feature = "unicode-pdf")]
+        if self.unicode_fonts.is_some() {
+            let raw = self
+                .font_manager
+                .as_ref()
+                .and_then(|fm| fm.get_font_bytes(&_font.to_string()))
+                .ok_or_else(|| ZplError::FontError("Font not found".into()))?;
+            if raw.starts_with(b"OTTO") {
+                if text.chars().any(|ch| char_to_winansi(ch).is_none()) {
+                    return Err(ZplError::FontError(
+                        "Unicode PDF requires a TrueType font".into(),
+                    ));
+                }
+            } else {
+                let fonts = self.unicode_fonts.as_mut().unwrap();
+                let font = self
+                    .font_manager
+                    .as_ref()
+                    .and_then(|fm| fm.get_font(&_font.to_string()))
+                    .ok_or_else(|| ZplError::FontError("Font not found".into()))?;
+                let chars = fonts.entry(_font).or_default();
+                self.content.push(b'<');
+                for ch in text.chars() {
+                    if font.glyph_id(ch).0 == 0 {
+                        return Err(ZplError::FontError("Font missing required glyph".into()));
+                    }
+                    let next = u16::try_from(chars.len() + 1)
+                        .map_err(|_| ZplError::FontError("Font character limit".into()))?;
+                    let cid = *chars.entry(ch).or_insert(next);
+                    self.content
+                        .extend_from_slice(format!("{cid:04X}").as_bytes());
+                }
+                self.content.extend_from_slice(b"> Tj\n");
+                return Ok(());
+            }
+        }
         self.content.push(b'(');
         for c in text.chars() {
             let b = char_to_winansi(c).unwrap_or(b'?');
@@ -331,6 +383,7 @@ impl PdfNativeBackend {
             }
         }
         self.content.extend_from_slice(b") Tj\n");
+        Ok(())
     }
 
     fn set_fill_color(&mut self, r: f64, g: f64, b: f64) {
@@ -1077,7 +1130,7 @@ impl ZplForgeBackend for PdfNativeBackend {
         self.emit_nums(&tm, "Tm");
         let font_resource_name = format!("F_{}", font);
         self.emit_name_op(&format!("{} 1", font_resource_name), "Tf");
-        self.emit_tj(text);
+        self.emit_tj(text, font)?;
         self.emit_op("ET");
 
         if reverse_print {
@@ -1722,6 +1775,20 @@ impl ZplForgeBackend for PdfNativeBackend {
         for font_char in &self.used_fonts {
             let font_key = font_char.to_string();
             let resource_name = format!("F_{}", font_char);
+
+            #[cfg(feature = "unicode-pdf")]
+            if let Some(fonts) = &self.unicode_fonts {
+                let raw = self
+                    .font_manager
+                    .as_ref()
+                    .and_then(|fm| fm.get_font_bytes(&font_key))
+                    .unwrap_or(default_font_bytes);
+                if let Some(chars) = fonts.get(font_char) {
+                    let id = unicode::embed(&mut doc, raw, chars)?;
+                    font_dict.set(resource_name.as_str(), id);
+                    continue;
+                }
+            }
 
             let actual_name = self
                 .font_manager

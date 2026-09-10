@@ -1,0 +1,23 @@
+[package]
+name = "yqn-zpl-forge-wasm"
+version = "0.3.2-yqn.1"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yunquna/zpl-forge"
+description = "Byte-oriented ZPL rendering for JavaScript and Worker runtimes"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+zpl-forge = { path = "..", features = ["unicode-pdf"] }
+wasm-bindgen = "=0.2.128"
+serde_json = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

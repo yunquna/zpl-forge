@@ -1,0 +1,31 @@
+name: YQN WASM qualification
+on:
+  push:
+    branches: [dev, 'codex/**']
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: cargo install wasm-bindgen-cli --version 0.2.128 --locked
+      - run: rustfmt --edition 2024 --check src/forge/pdf_native.rs wasm/src/lib.rs
+      - run: cargo test --manifest-path wasm/Cargo.toml --locked -p zpl-forge --lib
+      - run: cargo test --manifest-path wasm/Cargo.toml --locked --lib
+      - run: bash wasm/build.sh
+      - run: node wasm/smoke.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zpl-forge-wasm-candidate
+          path: wasm/pkg/

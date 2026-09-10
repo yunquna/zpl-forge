@@ -35,7 +35,6 @@ image = { version = "0.25", default-features = false, features = [
 # we only need the drawing primitives and `text` (draw_text_mut).
 imageproc = { version = "0.27", default-features = false, features = [
     "text",
-    "rayon",
 ], optional = true }
 base64 = { version = "0.23", optional = true }
 # default-features off: we only use the barcode *encoder* (MultiFormatWriter);
@@ -61,6 +60,15 @@ lopdf = { version = "0.44", default-features = false, features = [
 ], optional = true }
 flate2 = { version = "1.1", optional = true }
 
+# Preserve native raster parallelism without enabling threads in wasm32.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+imageproc = { version = "0.27", default-features = false, features = ["text", "rayon"], optional = true }
+
+[dependencies.subsetter]
+version = "0.2.6"
+default-features = false
+optional = true
+
 [features]
 default = ["png", "pdf"]
 # PNG raster backend (image + imageproc + barcode generation)
@@ -69,6 +77,8 @@ png = ["dep:image", "dep:imageproc", "dep:rxing", "dep:base64"]
 pdf = ["dep:lopdf", "dep:flate2", "dep:image", "dep:rxing", "dep:base64"]
 # Internal debug logging via the `tracing` crate
 tracing = ["dep:tracing"]
+# Opt-in Unicode CID fonts and PDF-only subsetting; existing backend stays compatible.
+unicode-pdf = ["pdf", "dep:subsetter"]
 
 [profile.release]
 lto = true
