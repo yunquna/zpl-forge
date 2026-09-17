@@ -54,6 +54,7 @@ mod ast;
 mod engine;
 pub mod error;
 pub mod forge;
+pub mod standalone_barcode;
 pub mod tools;
 
 pub use engine::*;

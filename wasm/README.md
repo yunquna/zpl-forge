@@ -41,6 +41,14 @@ published WASM package and are not fetched by the engine.
 - `renderPdfPages(zpl, widthDots, heightDots, dpi, pagesJson)` renders the same
   template with one string-variable map per PDF page. It does not split arbitrary
   concatenated ZPL labels. One uppercase ^XA/^XZ format per template is required by the wrapper.
+- `renderBarcodeSvg(kind, data, moduleSize, quietZone)` returns one self-contained SVG string.
+- `renderBarcodePng(kind, data, moduleSize, quietZone)` returns one PNG byte array.
+
+Standalone barcode kinds are `CODE_128`, `CODE_39`, `EAN_13`,
+`INTERLEAVED_2_OF_5`, `PDF417`, `AZTEC`, `DATAMATRIX`, and `QR`.
+The wrapper accepts at most 4096 input bytes, module sizes 1–32, quiet zones
+0–64, 16 million PNG pixels, and 8 MiB SVG/output bytes. Batch scheduling and
+Artifact/Data URL delivery remain caller responsibilities.
 
 Initial wrapper limits: ZPL and variable JSON each 64 KiB, font 16 MiB, each canvas
 dimension 1–4096 dots and area at most 4,194,304 dots², 1–32 variable-map pages,

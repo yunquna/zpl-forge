@@ -116,6 +116,32 @@ impl ZplRenderer {
         let output = engine.to_png().map_err(map_render_error)?;
         check_output(output)
     }
+
+    #[wasm_bindgen(js_name = renderBarcodeSvg)]
+    pub fn render_barcode_svg(
+        &self,
+        kind: &str,
+        data: &str,
+        module_size: u32,
+        quiet_zone: u32,
+    ) -> Result<String, JsError> {
+        zpl_forge::standalone_barcode::render_svg(kind, data, module_size, quiet_zone)
+            .map_err(|_| JsError::new("BARCODE_RENDER_FAILED"))
+    }
+
+    #[wasm_bindgen(js_name = renderBarcodePng)]
+    pub fn render_barcode_png(
+        &self,
+        kind: &str,
+        data: &str,
+        module_size: u32,
+        quiet_zone: u32,
+    ) -> Result<Vec<u8>, JsError> {
+        check_output(
+            zpl_forge::standalone_barcode::render_png(kind, data, module_size, quiet_zone)
+                .map_err(|_| JsError::new("BARCODE_RENDER_FAILED"))?,
+        )
+    }
 }
 
 impl Default for ZplRenderer {
